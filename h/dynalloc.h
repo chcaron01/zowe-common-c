@@ -702,6 +702,7 @@ int dynallocDataset(DynallocInputParms *inputParms, int *reasonCode);
 int dynallocDatasetMember(DynallocInputParms *inputParms, int *reasonCode,
                           char *member);
 int unallocDataset(DynallocInputParms *inputParms, int *reasonCode);
+int freeDataset(DynallocInputParms *inputParms, int *reasonCode);
 
 #endif
 

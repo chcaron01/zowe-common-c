@@ -959,6 +959,61 @@ int unallocDataset(DynallocInputParms *inputParms, int *reasonCode) {
 
 }
 
+int freeDataset(DynallocInputParms *inputParms, int *reasonCode) {
+
+  ALLOC_STRUCT31(
+    STRUCT31_NAME(below2G),
+    STRUCT31_FIELDS(
+      DynallocParms parms;
+      TextUnit * __ptr32 textUnits[2];
+    )
+  );
+
+  DynallocParms *parms = &below2G->parms;
+  dynallocParmsInit(parms);
+
+  unsigned int textUnitCount = TEXT_UNIT_ARRAY_SIZE(below2G->textUnits);
+  dynallocParmsSetTextUnits(parms, below2G->textUnits, textUnitCount);
+
+  int rc;
+
+  do {
+
+    rc = -1;
+
+    below2G->textUnits[0] = createSimpleTextUnit2(DALDDNAM,
+                                                  inputParms->ddName,
+                                                  sizeof(inputParms->ddName));
+    if (below2G->textUnits[0] == NULL) {
+      break;
+    }
+    
+    below2G->textUnits[1] = createCharTextUnit(DALNDISP, 4);
+    if (below2G->textUnits[1] == NULL) {
+      break;
+    }
+    
+    turn_on_HOB(below2G->textUnits[textUnitCount - 1]);
+
+    rc = dynfree(parms);
+
+    *reasonCode = dynallocParmsGetInfoCode(parms) +
+        (dynallocParmsGetErrorCode(parms) << 16);
+
+  } while (0);
+
+  freeTextUnitArray(below2G->textUnits, textUnitCount);
+
+  dynallocParmsTerm(parms);
+  parms = NULL;
+
+  FREE_STRUCT31(
+    STRUCT31_NAME(below2G)
+  );
+
+  return rc;
+}
+
 
 
 /*

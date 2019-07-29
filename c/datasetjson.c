@@ -1234,8 +1234,8 @@ void respondWithVSAMDataset(HttpResponse* response, char* absolutePath, hashtabl
 
     int ddNumber = 1;
     while (reasonCode==0x4100000 && ddNumber < 100000) {
-      sprintf(inputParms.ddName, "MVD%05d", ddNumber);
       sprintf(ddname, "MVD%05d", ddNumber);
+      memcpy(inputParms.ddName, ddname, DD_NAME_LEN);
       returnCode = dynallocDataset(&inputParms, &reasonCode);
       ddNumber++;
     }
@@ -1674,6 +1674,40 @@ void respondWithHLQNames(HttpResponse *response, MetadataQueryCache *metadataQue
   metadataQueryCache->cachedCSIParmblocks = returnParmsArray;
   finishResponse(response);     
 #endif /* __ZOWE_OS_ZOS */
+}
+
+void removeDataset(HttpResponse* response, char* dsName){
+  int rc = 0;
+  int returnCode = 0;
+  DynallocInputParms inputParms = {0};
+  strncpy(inputParms.dsName, dsName, DATASET_NAME_LEN);
+  padWithSpaces(inputParms.dsName, sizeof(inputParms.dsName), 1, 0);
+  memcpy(inputParms.ddName, "MVD00000", 8);
+  inputParms.disposition = DISP_OLD;
+  char ddname[9] = "MVD00000";
+  returnCode = dynallocDataset(&inputParms, &rc);
+  int ddNumber = 1;
+  while (rc==0x4100000 && ddNumber < 100000) {
+    sprintf(ddname, "MVD%05d", ddNumber);
+    memcpy(inputParms.ddName, ddname, DD_NAME_LEN);
+    returnCode = dynallocDataset(&inputParms, &rc);
+    ddNumber++;
+  }
+  if (returnCode) {
+    printf("Dynalloc RC = %d, reasonCode = %x\n", returnCode, rc);
+    respondWithError(response, HTTP_STATUS_INTERNAL_SERVER_ERROR, "Unable to allocate a DD for deletion");
+    return;
+  }
+  returnCode = freeDataset(&inputParms, &rc);
+  if (returnCode) {
+    printf("Dynalloc RC = %d, reasonCode = %x\n", returnCode, rc);
+    respondWithError(response, HTTP_STATUS_INTERNAL_SERVER_ERROR, "Unable to delete dataset");
+    return;
+  }
+  else {
+    printf("Dynalloc RC = %d, reasonCode = %x\n", returnCode, rc);
+    response200WithMessage(response, "Successfully deleted dataset");
+  }
 }
 
 

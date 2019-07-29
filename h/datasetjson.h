@@ -58,12 +58,12 @@ void addMemberedDatasetMetadata(char *datasetName, int nameLength,
                                 char *memberQuery, int memberLength,
                                 jsonPrinter *jPrinter,
                                 int includeUnprintable);
-void respondWithDataset(HttpResponse* response, char* absolutePath, int jsonMode);
-void respondWithVSAMDataset(HttpResponse* response, char* absolutePath, hashtable *acbTable, int jsonMode);
+
 void respondWithDatasetMetadata(HttpResponse *response);
 void respondWithHLQNames(HttpResponse *response, MetadataQueryCache *metadataQueryCache);
-void updateDataset(HttpResponse* response, char* absolutePath, int jsonMode);
-void updateVSAMDataset(HttpResponse* response, char* absolutePath, hashtable *acbTable, int jsonMode);
+void removeDataset(HttpResponse* response, char* fullPath);
+void respondWithDataset(HttpResponse* response, char* fullPath, int jsonMode, HttpService* service);
+void updateDataset(HttpResponse* response, char* fullPath, int jsonMode, HttpService* service);
 #endif
 
 
